@@ -1,9 +1,38 @@
 class Solution:
     def findSubstring(self, s: str, words: list[str]) -> list[int]:
-        
+        cartisianTable = []
+        cartisianTable.append([words.pop()])
+        for word in words:
+            lenght = len(cartisianTable[0])
+            tempCartisianTable = cartisianTable
+            # print("tempcartisiantable:",tempCartisianTable)
+            cartisianTable = []
+            for i in tempCartisianTable:
+                for j in range(lenght+1):
+                    # print('i:',i,'j:',j)
+                    newWord = [*i[:j],word,*i[j:]]
+                    # print("newWord:",newWord)
+                    if(newWord not in cartisianTable):
+                        cartisianTable.append(newWord)
+        # print("final cartisian : ", cartisianTable)
+        updatedCartisianTable = list(map(''.join, cartisianTable))
+        print(updatedCartisianTable)
+        j = len(updatedCartisianTable[0])
+        i = 0
+        ans = []
+        while(j <= len(s)):
+            if(s[i:j] in updatedCartisianTable):
+                ans.append(i)
+            i += 1
+            j += 1
+        return ans
 
-s = input('s = ')
+
+
+# s = input('s = ')
+s = "xxx"
 words = input('words = ').split()
+# print(words)
 object = Solution()
 ans = object.findSubstring(s, words)
 print(ans)
