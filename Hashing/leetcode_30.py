@@ -1,5 +1,5 @@
 class Solution:
-    def findSubstring(self, s: str, words: list[str]) -> list[int]:
+    def findSubstringOld(self, s: str, words: list[str]) -> list[int]:
         cartisianTable = []
         cartisianTable.append([words.pop()])
         for word in words:
@@ -26,6 +26,20 @@ class Solution:
             i += 1
             j += 1
         return ans
+
+    def findSubstring(self, s: str, words: list[str]) -> list[int]:
+        j = len("".join(words))
+        i = 0
+        while(j <= len(s)):
+            for x in s[i:j]:
+                tempWords = words
+                for y in tempWords:
+                    if x == y[0]:
+                        z = len(y)
+                        if s[i:z] == y:
+                            s[i:z] = ""
+                            tempWords.remove(y)
+        
 
 
 
