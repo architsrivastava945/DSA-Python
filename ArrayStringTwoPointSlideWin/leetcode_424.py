@@ -6,18 +6,18 @@ class Solution:
             return (0, "NA")
         freq = Counter(tempS)
         maxFreq = freq[tempS[0]]
-        maxKey = "NA"
+        maxKey = tempS[0]
         for key, value in freq.items():
             if value > maxFreq:
                 maxFreq = value
                 maxKey = key
-        return (len(tempS) - maxFreq, key)
+        return (len(tempS) - maxFreq, maxKey)
 
 
     def characterReplacement(self, s: str, k: int) -> int:
         unmatch = 0
-        maxLen = 0
         i,j = 0,k
+        maxLen = j - i
         (unmatch, key) = self.calc_unmatch(s[i:j])
         while j < len(s):
             if unmatch > k:
@@ -31,7 +31,9 @@ class Solution:
             if unmatch > ((j-i)/2):
                 (unmatch, key) = self.calc_unmatch(s[i:j])
             if unmatch <= k:
-                maxLen = max(maxLen, j-i)
+                localMax = j - i
+                if localMax > maxLen:
+                    maxLen = localMax
         return maxLen
 
 
