@@ -380,3 +380,176 @@ int climbStairs(int n) {
 | **Memoization** | $O(N)$ | $O(N) + O(N)$ (Stack) | Moderate | Quick prototype from recursion |
 | **Tabulation** | $O(N)$ | $O(N)$ | **None** | Online Assessments (OAs) |
 | **Space Optimized** | **$O(N)$** | **$O(1)$** | **None** | **Production & Coding Interviews** |
+
+---
+---
+
+# DP 3. House Robber | 1D Dynamic Programming
+**Source:** [Shradha Khapra - DP 3. House Robber | 1D Dynamic Programming](https://www.youtube.com/watch?v=BRmLlJA6ncI)
+
+---
+
+## 1. Problem Statement & Constraint Analysis
+
+* **Problem (LeetCode 198):** You are a professional robber planning to rob houses along a street.
+* **Input:** An array `nums` of non-negative integers where `nums[i]` represents the amount of money stored in the $i$-th house.
+* **Constraint:** **No adjacent houses can be robbed** on the same night (an alarm will trigger).
+* **Objective:** Find the **maximum amount of money** you can rob without alerting the police.
+
+```
+Houses Array: [ 2,   7,   9,   3,   1 ]
+                ▲        ▲        ▲
+Selected:     (Rob)    (Rob)    (Rob)  --->  Total = 2 + 9 + 1 = 12 (Optimal)
+               [2]  x   [9]  x   [1]
+```
+
+---
+
+## 2. Core Decision Model (Include / Exclude Principle)
+
+At every house $i$, the robber has two mutually exclusive choices:
+
+```
+                           Decision at House i
+                                    │
+           ┌────────────────────────┴────────────────────────┐
+           ▼                                                 ▼
+1. Rob House i (Include / Pick)                 2. Skip House i (Exclude / Leave)
+   • Gain: nums[i]                                • Gain: 0 from house i
+   • Constraint: Cannot rob house i-1             • Constraint: Free to rob house i-1
+   • Subproblem remaining: 0 to i-2               • Subproblem remaining: 0 to i-1
+   • Total: dp[i-2] + nums[i]                     • Total: dp[i-1]
+```
+
+* **Recurrence Relation:**
+  $$\text{dp}[i] = \max\Big(\underbrace{\text{dp}[i - 1]}_{\text{Skip House } i}, \underbrace{\text{dp}[i - 2] + \text{nums}[i]}_{\text{Rob House } i}\Big)$$
+
+---
+
+## 3. Dynamic Programming Properties
+
+```
+                               House Robber
+                                    │
+           ┌────────────────────────┴────────────────────────┐
+           ▼                                                 ▼
+1. Overlapping Subproblems                        2. Optimal Substructure
+   • Subarrays like [2, 7, 9] are solved          • Global max profit for n houses is built
+     multiple times in brute force recursion.       directly by combining optimal solutions
+                                                    of (n-1) and (n-2) houses.
+```
+
+---
+
+## 4. Solution Approaches
+
+```
+                      Solution Approaches
+                               │
+       ┌───────────────────────┼───────────────────────┐
+       ▼                       ▼                       ▼
+1. Plain Recursion      2. Tabulation (Bottom-Up) 3. Space-Optimized Tabulation
+   • O(2^N) Time           • O(N) Time              • O(N) Time
+   • O(N) Stack Space      • O(N) Array Space       • O(1) Constant Space (Best)
+```
+
+---
+
+### 4.1 Approach 1: Plain Recursion (Brute Force)
+
+```
+                            Rob(n-1)
+                           /        \
+                    Rob(n-2)        Rob(n-3) + nums[n-1]
+                   /        \
+              Rob(n-3)    Rob(n-4) + nums[n-2]
+```
+
+* **Time Complexity:** $O(2^N)$ (Exponential branching at every house).
+* **Space Complexity:** $O(N)$ (Auxiliary call stack depth).
+
+---
+
+### 4.2 Approach 2: Tabulation (1D DP Array)
+
+#### 3-Step Tabulation Framework:
+1. **Define Meaning:** `dp[i]` stores the maximum money that can be robbed from the first $i+1$ houses (`nums[0 ... i]`).
+2. **Initialize Base Cases:**
+   * `dp[0] = nums[0]` (Only 1 house $\rightarrow$ rob it).
+   * `dp[1] = max(nums[0], nums[1])` (2 houses $\rightarrow$ pick the wealthier one).
+3. **Iterate Bottom-Up:** Loop from index `i = 2` to `n - 1` using the recurrence formula.
+
+```
+nums:    [  2,   7,   9,   3,   1  ]
+dp:      [  2,   7,  11,  11,  12  ]
+            ▲   ▲    ▲
+            │   │    └── dp[2] = max(dp[1], dp[0] + nums[2]) = max(7, 2 + 9) = 11
+            │   └─────── dp[1] = max(nums[0], nums[1]) = max(2, 7) = 7
+            └─────────── dp[0] = nums[0] = 2
+```
+
+* **C++ Code:**
+```cpp
+int rob(vector<int>& nums) {
+    int n = nums.size();
+    if (n == 1) return nums[0];
+    
+    vector<int> dp(n);
+    dp[0] = nums[0];
+    dp[1] = max(nums[0], nums[1]);
+    
+    for (int i = 2; i < n; i++) {
+        dp[i] = max(dp[i - 1], dp[i - 2] + nums[i]);
+    }
+    return dp[n - 1];
+}
+```
+* **Time Complexity:** $O(N)$
+* **Space Complexity:** $O(N)$ (DP table storage)
+
+---
+
+### 4.3 Approach 3: Space-Optimized DP (Constant Space)
+
+* **Key Insight:** To calculate `dp[i]`, we only ever reference `dp[i - 1]` and `dp[i - 2]`. No previous history beyond two steps is required.
+* **State Mapping:**
+  * `prev1` $\rightarrow$ Represents `dp[i-2]`
+  * `prev2` $\rightarrow$ Represents `dp[i-1]`
+
+```
+       prev1 (i-2)       prev2 (i-1)           result (i)
+          [ 2 ]             [ 7 ]    ───►  max(7, 2 + 9) = [ 11 ]
+            │                 │                   │
+            └── prev1 <───────┘         prev2 <───┘ (Shift variables)
+```
+
+* **C++ Code:**
+```cpp
+int rob(vector<int>& nums) {
+    int n = nums.size();
+    if (n == 1) return nums[0];
+    
+    int prev1 = nums[0];                // dp[0]
+    int prev2 = max(nums[0], nums[1]);  // dp[1]
+    int result = prev2;
+    
+    for (int i = 2; i < n; i++) {
+        result = max(prev2, prev1 + nums[i]);
+        prev1 = prev2;
+        prev2 = result;
+    }
+    return result;
+}
+```
+* **Time Complexity:** $O(N)$
+* **Space Complexity:** $O(1)$ (**Optimal constant memory**)
+
+---
+
+## 5. Comparative Summary
+
+| Strategy | Recurrence State | Time Complexity | Space Complexity | Stack Overhead |
+| :--- | :--- | :--- | :--- | :--- |
+| **Recursion** | $F(i) = \max(F(i-1), F(i-2) + \text{nums}[i])$ | $O(2^N)$ | $O(N)$ | Yes ($O(N)$ depth) |
+| **Tabulation** | $\text{dp}[i] = \max(\text{dp}[i-1], \text{dp}[i-2] + \text{nums}[i])$ | $O(N)$ | $O(N)$ | **None** |
+| **Space-Optimized** | $\text{curr} = \max(\text{prev2}, \text{prev1} + \text{nums}[i])$ | **$O(N)$** | **$O(1)$** | **None** |
