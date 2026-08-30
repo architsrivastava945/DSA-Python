@@ -178,3 +178,205 @@ Mastering DP relies on understanding patterns rather than memorizing questions.
 * **Start with Memoization:** In initial practice (first 10–15 problems), write standard recursion, then add memoization.
 * **Shift to Tabulation:** Convert memoized solutions to iterative tabulation to save recursion stack memory and prevent stack overflow in Online Assessments (OAs).
 * **Pattern Recognition:** Map new unseen problems to known core templates (1D DP, Knapsack, LCS, Grid, MCM).
+
+---
+---
+
+# DP 2. Climbing Stairs | 1D Dynamic Programming
+**Source:** [Shradha Khapra - DP 2. Climbing Stairs | 1D Dynamic Programming](https://youtu.be/3GzA0mz6wp0?si=36FyghaEKkxw9ryM)
+
+---
+
+## 1. Problem Statement & Intuition
+
+* **Problem (LeetCode 70):** You are climbing a staircase that has $n$ steps. You are standing at ground level ($0$) and want to reach step $n$.
+* **Allowed Moves:** At each step, you can climb either **1 step** or **2 steps**.
+* **Objective:** Find the total number of **distinct ways** to reach the top ($n$-th step).
+
+```
+                      [ Step n ]  <-- Target Top
+                         /   \
+            (Take 1 step)     (Take 2 steps)
+               /                 \
+       [ Step n-1 ]          [ Step n-2 ]
+```
+
+---
+
+### 1.1 Base Cases Walkthrough
+* **$n = 1$ Stair:**
+  * Ways: `(1)` $\rightarrow$ **1 distinct way**
+* **$n = 2$ Stairs:**
+  * Ways: `(1 + 1)`, `(2)` $\rightarrow$ **2 distinct ways**
+* **$n = 3$ Stairs:**
+  * Ways: `(1 + 1 + 1)`, `(1 + 2)`, `(2 + 1)` $\rightarrow$ **3 distinct ways**
+* **$n = 4$ Stairs:**
+  * From Step $0$, take 1 step $\rightarrow$ remaining problem is $n=3$ ($3$ ways)
+  * From Step $0$, take 2 steps $\rightarrow$ remaining problem is $n=2$ ($2$ ways)
+  * Total ways = $3 + 2 =$ **5 distinct ways** (`1+1+1+1`, `1+1+2`, `1+2+1`, `2+1+1`, `2+2`)
+
+---
+
+## 2. Dynamic Programming Characteristics
+
+```
+                             Climbing Stairs
+                                    │
+           ┌────────────────────────┴────────────────────────┐
+           ▼                                                 ▼
+1. Overlapping Subproblems                        2. Optimal Substructure
+   • F(3), F(2) computed repeatedly                 • Ways(n) = Ways(n-1) + Ways(n-2)
+   • Multiple recursive branch choices               • Optimal solution derived from
+     (1-step vs 2-step)                                optimal sub-solutions
+```
+
+* **Recurrence Relation:**
+  $$\text{Ways}(n) = \text{Ways}(n-1) + \text{Ways}(n-2)$$
+* **Direct 1D DP Variation:** The mathematical sequence is identical to the **Fibonacci sequence** with shifted base cases ($F(1)=1, F(2)=2$).
+
+---
+
+## 3. Solution Approaches
+
+```
+                      Solution Approaches
+                               │
+       ┌───────────────────────┼───────────────────────┐
+       ▼                       ▼                       ▼
+1. Plain Recursion      2. Memoization (Top-Down) 3. Tabulation (Bottom-Up)
+   • O(2^N) Time           • O(N) Time              • O(N) Time
+   • O(N) Stack Space      • O(N) Auxiliary Space   • O(1) Space (Optimized)
+```
+
+---
+
+### 3.1 Approach 1: Plain Recursion (Brute Force)
+
+```
+                            F(4)
+                          /      \
+                      F(3)        F(2)  <-- Repeated Computation
+                     /    \      /    \
+                  F(2)   F(1)  F(1)   F(0)
+                  /  \
+                F(1) F(0)
+```
+
+* **C++ Code:**
+```cpp
+int climbStairs(int n) {
+    if (n == 1 || n == 2) return n;
+    return climbStairs(n - 1) + climbStairs(n - 2);
+}
+```
+* **Time Complexity:** $O(2^N)$ (Exponential)
+* **Space Complexity:** $O(N)$ (Recursion stack depth)
+
+---
+
+### 3.2 Approach 2: Memoization (Top-Down DP)
+
+* **Mechanism:** Initialize a lookup table (`vector<int> dp(n + 1, -1)`). Before recurring, check if `dp[n] != -1`.
+
+```
+                    Call helper(n, dp)
+                            │
+                  Is n <= 2? ─── YES ───► Return n
+                            │ NO
+                Is dp[n] != -1? ─── YES ───► Return dp[n]
+                            │ NO
+             Compute: dp[n] = helper(n-1) + helper(n-2)
+                            │
+                       Return dp[n]
+```
+
+* **C++ Code:**
+```cpp
+int helper(int n, vector<int>& dp) {
+    if (n == 1 || n == 2) return n;
+    if (dp[n] != -1) return dp[n];
+    return dp[n] = helper(n - 1, dp) + helper(n - 2, dp);
+}
+
+int climbStairs(int n) {
+    vector<int> dp(n + 1, -1);
+    return helper(n, dp);
+}
+```
+* **Time Complexity:** $O(N)$
+* **Space Complexity:** $O(N)$ (DP vector) + $O(N)$ (Recursion stack)
+
+---
+
+### 3.3 Approach 3: Tabulation (Bottom-Up DP)
+
+* **3-Step Framework:**
+  1. **Define Table & Meaning:** `dp[i]` represents total distinct ways to climb $i$ stairs.
+  2. **Initialize Base Values:** `dp[1] = 1`, `dp[2] = 2`.
+  3. **Iterate Bottom-Up:** Loop from $i = 3$ to $n$, filling `dp[i] = dp[i-1] + dp[i-2]`.
+
+```
+Index (i):    1    2    3    4    5
+dp[i]:      [ 1 ][ 2 ][ 3 ][ 5 ][ 8 ]
+              ▲    ▲    ▲
+          Base Cases    └── dp[3] = dp[2] + dp[1]
+```
+
+* **C++ Code:**
+```cpp
+int climbStairs(int n) {
+    if (n == 1 || n == 2) return n;
+    vector<int> dp(n + 1);
+    dp[1] = 1;
+    dp[2] = 2;
+    for (int i = 3; i <= n; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+    return dp[n];
+}
+```
+* **Time Complexity:** $O(N)$
+* **Space Complexity:** $O(N)$ (No recursion call stack overhead)
+
+---
+
+### 3.4 Approach 4: Space-Optimized Tabulation (Most Optimal)
+
+* **Observation:** To compute `dp[i]`, we only need the immediate two previous states (`dp[i-1]` and `dp[i-2]`). We can replace the whole $O(N)$ array with two variables.
+
+```
+       prev2 (n-2)       prev1 (n-1)         result
+          [ 1 ]    +        [ 2 ]     --->   [ 3 ]
+                     │                  │
+         prev2 <─────┘      prev1 <─────┘  (Shift for next iteration)
+```
+
+* **C++ Code:**
+```cpp
+int climbStairs(int n) {
+    if (n == 1 || n == 2) return n;
+    int prev2 = 1; // Represents n = 1
+    int prev1 = 2; // Represents n = 2
+    int result = prev1;
+    
+    for (int i = 3; i <= n; i++) {
+        result = prev1 + prev2;
+        prev2 = prev1;
+        prev1 = result;
+    }
+    return result;
+}
+```
+* **Time Complexity:** $O(N)$
+* **Space Complexity:** $O(1)$ (Constant Space)
+
+---
+
+## 4. Complexity & Trade-Off Summary
+
+| Approach | Time Complexity | Space Complexity | Stack Overflow Risk | Recommended For |
+| :--- | :--- | :--- | :--- | :--- |
+| **Recursion** | $O(2^N)$ | $O(N)$ | High | Conceptual understanding |
+| **Memoization** | $O(N)$ | $O(N) + O(N)$ (Stack) | Moderate | Quick prototype from recursion |
+| **Tabulation** | $O(N)$ | $O(N)$ | **None** | Online Assessments (OAs) |
+| **Space Optimized** | **$O(N)$** | **$O(1)$** | **None** | **Production & Coding Interviews** |
