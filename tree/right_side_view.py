@@ -25,3 +25,30 @@ def right_side_view(root):
             level.append(curr.value)
         res.append(level[-1])
     return res
+
+from collections import deque
+
+def rightSideView(root):
+    if not root:
+        return []
+        
+    res = []
+    queue = deque([root])
+    
+    while queue:
+        level_size = len(queue)
+        
+        for i in range(level_size):
+            curr = queue.popleft() # FIFO: Process nodes level by level from left to right
+            
+            # If this is the last node in the current level, add it to our result!
+            if i == level_size - 1:
+                res.append(curr.val) # Assuming node attribute is .val (or .value)
+                
+            # Add children for the next level
+            if curr.left:
+                queue.append(curr.left)
+            if curr.right:
+                queue.append(curr.right)
+                
+    return res
